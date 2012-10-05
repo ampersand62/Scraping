@@ -17,7 +17,11 @@ my $MAXDEPTH = 10;
 my $string = shift(@ARGV);
 my @URLS;
 my %visited = ();
-my $mech = WWW::Mechanize->new();
+my $mech = WWW::Mechanize->new(
+    autocheck => 0
+    );
+
+$mech->agent_alias('Mac Safari');
 
 my %IGNORE_SCHEME = ( 
     'mailto' => 1,
@@ -27,6 +31,10 @@ my %IGNORE_SCHEME = (
 
 # Populate the initial URL list
 foreach my $url (@ARGV) {
+    # Put on an http:// if it doesn't already exist....
+    unless ($url =~ /^http/) {
+	$url = "http://" . $url;
+    }
     push @URLS, { url =>$url, 
 		  depth => 0
     };
@@ -41,19 +49,23 @@ sub crawl {
 
     # Are we at the max depth yet?
     if ($depth >= $MAXDEPTH) {
-	print "*** At Maximum depth: $url\n" if $DEBUG;
+	print STDERR "*** At Maximum depth: $url\n" if $DEBUG;
 	return;
     }
 
     # Check it's not on the kill list
     if ($visited{$url}) {
-	print "*** Already visited $url\n" if $DEBUG;
+	print STDERR "*** Already visited $url\n" if $DEBUG;
 	return;
     } else {
 	$visited{$url} = 1;
     }
 
     $mech->get($url);
+    unless ($mech->success()) {
+	print STDERR "*** Get operation failed on $url\n" if $DEBUG;
+	return;
+    }
 
     # See if we match the query string
     my $content = $mech->content();
