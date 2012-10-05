@@ -10,8 +10,11 @@
 use warnings;
 use WWW::Mechanize;
 #use Data::Dumper;
+
 # Variables we can tweak to change behaviour
 my $DEBUG = 1;
+my $DISPLAY_MISSES = 0;
+my $CRAWL_MISSES = 1;
 my $MAXDEPTH = 10;
 
 my $string = shift(@ARGV);
@@ -72,19 +75,21 @@ sub crawl {
     my $matches = 0;
     $matches++  while ($content =~ /$string/ogi);
 
-    if ( $DEBUG || ($matches > 0)) {
+    if ( $DISPLAY_MISSES || ($matches > 0)) {
 	print "$url, \"$string\", $matches, $depth\n";
     }
 
-    # Add all the links to the URL list
+    if ( $CRAWL_MISSES || ($matches >0)) {
+	# Add all the links to the URL list
 
-    foreach my $link ($mech->links()) {
+	foreach my $link ($mech->links()) {
 	
-	# Not all types of URLS can be followed
-	next if $IGNORE_SCHEME{$link->url_abs()->scheme};
-	push @URLS, {
-	    url => $link->url_abs()->as_string, 
-	    depth =>$depth+1
-	};
+	    # Not all types of URLS can be followed
+	    next if $IGNORE_SCHEME{$link->url_abs()->scheme};
+	    push @URLS, {
+		url => $link->url_abs()->as_string, 
+		depth =>$depth+1
+	    };
+	}
     }
 }
