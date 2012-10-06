@@ -1,0 +1,6 @@
+digraph Demo {
+
+      "en.wikipedia.org" -> "www.guardian.co.uk";
+      "www.guardian.co.uk" -> "en.wikipedia.org";
+      "chinamielville.org" -> "en.wikipedia.org";
+}

@@ -1,0 +1,6 @@
+graph Demo {
+
+      en.wikipedia.org -> www.guardian.co.uk
+      www.guardian.co.uk -> en.wikipedia.org
+      chinmielville.org -> en.wikipedia.org
+}

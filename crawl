@@ -14,7 +14,7 @@ use WWW::Mechanize;
 # Variables we can tweak to change behaviour
 my $DEBUG = 1;
 my $DISPLAY_MISSES = 0;
-my $CRAWL_MISSES = 1;
+my $CRAWL_MISSES = 0;
 my $MAXDEPTH = 10;
 
 my $string = shift(@ARGV);
