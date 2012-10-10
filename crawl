@@ -17,6 +17,8 @@ my $DISPLAY_MISSES = 0;
 my $CRAWL_MISSES = 1;
 my $MAXDEPTH = 6;
 
+# Need some command line arguments
+
 my $string = shift(@ARGV);
 my @URLS;
 my %visited = ();
