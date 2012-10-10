@@ -14,8 +14,8 @@ use WWW::Mechanize;
 # Variables we can tweak to change behaviour
 my $DEBUG = 1;
 my $DISPLAY_MISSES = 0;
-my $CRAWL_MISSES = 0;
-my $MAXDEPTH = 10;
+my $CRAWL_MISSES = 1;
+my $MAXDEPTH = 6;
 
 my $string = shift(@ARGV);
 my @URLS;
@@ -39,29 +39,29 @@ foreach my $url (@ARGV) {
 	$url = "http://" . $url;
     }
     push @URLS, { url =>$url, 
-		  depth => 0
+		  path => []
     };
 }
 
 while (my $loc = shift(@URLS)) {
-    crawl($string, $loc->{url}, $loc->{depth});
+    crawl($string, $loc->{url}, $loc->{path});
        }
 
 sub crawl {
-    my ($string, $url, $depth) = @_;
+    my ($string, $url, $path) = @_;
 
     # Are we at the max depth yet?
-    if ($depth >= $MAXDEPTH) {
+    if ($#{$path} >= $MAXDEPTH) {
 	print STDERR "*** At Maximum depth: $url\n" if $DEBUG;
 	return;
     }
 
-    # Check it's not on the kill list
-    if ($visited{$url}) {
-	print STDERR "*** Already visited $url\n" if $DEBUG;
+    # Check we don't have a loop
+    foreach my $u (@{$path}) {
+	if ($u eq $url) {
+	    print STDERR "*** Link loop at $url\n" if $DEBUG;
 	return;
-    } else {
-	$visited{$url} = 1;
+	}
     }
 
     $mech->get($url);
@@ -76,7 +76,10 @@ sub crawl {
     $matches++  while ($content =~ /$string/ogi);
 
     if ( $DISPLAY_MISSES || ($matches > 0)) {
-	print "$url, \"$string\", $matches, $depth\n";
+	# Output should be easy to paste into graphviz
+	print '"';
+	print join '" -> "', (@{$path}, $url);
+	print '"' . "\n";
     }
 
     if ( $CRAWL_MISSES || ($matches >0)) {
@@ -87,8 +90,8 @@ sub crawl {
 	    # Not all types of URLS can be followed
 	    next if $IGNORE_SCHEME{$link->url_abs()->scheme};
 	    push @URLS, {
-		url => $link->url_abs()->as_string, 
-		depth =>$depth+1
+		url  => $link->url_abs()->as_string, 
+		path => [ @{$path}, $url]
 	    };
 	}
     }
