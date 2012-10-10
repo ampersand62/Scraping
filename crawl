@@ -12,7 +12,7 @@ use WWW::Mechanize;
 #use Data::Dumper;
 
 # Variables we can tweak to change behaviour
-my $DEBUG = 1;
+my $DEBUG = 0;
 my $DISPLAY_MISSES = 0;
 my $CRAWL_MISSES = 1;
 my $MAXDEPTH = 6;
@@ -77,9 +77,11 @@ sub crawl {
 
     if ( $DISPLAY_MISSES || ($matches > 0)) {
 	# Output should be easy to paste into graphviz
-	print '"';
-	print join '" -> "', (@{$path}, $url);
-	print '"' . "\n";
+	print STDOUT '"';
+	print STDOUT join '" -> "', (@{$path}, "$url ($matches matches with $string)");
+	print STDOUT '"' . ";\n";
+    } elsif ($DEBUG) {
+	print STDERR '-';
     }
 
     if ( $CRAWL_MISSES || ($matches >0)) {
